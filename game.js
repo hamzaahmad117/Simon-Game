@@ -1,67 +1,70 @@
+var started = false;
+var answerArr = [];
+var level;
+var currentIndex;
 
+$(document).keydown(function() {
 
-var answerArray = [];
-var i;
-started = false;
-var gameOver;
-
-$(document).keydown(function () {
-
-    if(!started) {
-      started = true;
-      startGame();
-    }
+  if (!started) {
+    level = 0;
+    currentIndex = 0;
+    answerArr.push(nextLevel(level + 1));
+    started = true;
+  }
 
 });
 
 
-function startGame() {
+$(".btn").click(function(e) {
 
-  console.log('new game');
+  var answer = e.target.classList[1];
+  console.log("Button clicked is: " + answer);
+  makeSoundAndAnimate(answer);
+  var correct = compareAnswer(answer, currentIndex);
+  console.log(correct);
+  if (!correct) {
+    console.log("Game Over");
 
-  var answer;
-  answerArray = [];
-  i = 0;
-  answerArray.push(nextLevel(i + 1));
-
-  console.log("answerarraay" + answerArray);
-
-  // Making the buttons clickable
-  $(".btn").click(function (e) {
-  makeSoundAndAnimate(e.target.classList[1]);
-  answer = e.target.classList[1];
-  gameOver = checkAnswer(i, answer);
-  console.log(gameOver);
-
-  if ((i == answerArray.length - 1) && !gameOver) {
-    setTimeout(function() {answerArray.push(nextLevel(i + 1)); i = 0;},1000);
-    console.log(answerArray);
-  } if (gameOver){
     var audio = new Audio("sounds/wrong.mp3");
     audio.play();
     $("body").addClass("game-over");
-    setTimeout(function () {$("body").removeClass("game-over");}, 100);
-    $("#level-title").text("Game Over! Press any key to Restart.");
 
+    setTimeout(function() {
+      $("body").removeClass("game-over");
+      $("#level-title").text("Game Over! Press any Button to Start Again!");
+    }, 200);
     startOver();
   } else {
-      i++;
+    currentIndex++;
   }
 
-  console.log(gameOver ? "Game is Over" : "Game not over");
-  console.log(answerArray);
-  console.log(answer);
+
+  if (currentIndex == (answerArr.length) && correct) {
+    currentIndex = 0;
+    setTimeout(function() {
+      level++;
+      answerArr.push(nextLevel(level + 1));
+    }, 1000);
+
+  }
+
 });
-  return;
+
+function startOver() {
+  started = false;
+  answerArr = [];
+  level = 0;
+  currentIndex = 0;
 }
 
-function checkAnswer(c, answer) {
-  console.log(answerArray[c] + " " + answer);
-  console.log(c);
-  if (answer === answerArray[c]) {
-    return false;
-  } else {
+function compareAnswer(answer, index) {
+  if (answer == answerArr[index]) {
     return true;
+  } else {
+    console.log(index + ": " + answerArr[index]);
+    console.log(answer);
+    console.log("wrong");
+    return false;
   }
 }
 
@@ -88,8 +91,9 @@ function nextLevel(level) {
       console.log("Unexpected.");
   }
 
-  makeSoundAndAnimate(button);
-
+  $("." + button).fadeIn(100).fadeOut(100).fadeIn(100);
+  var audio = new Audio("sounds/" + button + ".mp3");
+  audio.play();
   return button;
 }
 
@@ -101,33 +105,6 @@ function makeSoundAndAnimate(button) {
     $("." + button).removeClass("pressed");
   }, 100);
 
-  var audio;
-  switch (button) {
-    case "red":
-      audio = new Audio("sounds/red.mp3");
-      break;
-    case "blue":
-      audio = new Audio("sounds/blue.mp3");
-      break;
-    case "yellow":
-      audio = new Audio("sounds/yellow.mp3");
-      break;
-    case "green":
-      audio = new Audio("sounds/green.mp3");
-      break;
-    default:
-      console.log("Unexpected Error Occurred.");
-  }
+  var audio = new Audio("sounds/" + button + ".mp3");
   audio.play();
-}
-
-
-
-function startOver() {
-
-  console.log("start over called");
-  started = false;
-  gameOver = false;
-  answerArray = [];
-  i = 0;
 }
